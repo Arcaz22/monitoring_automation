@@ -41,7 +41,7 @@ class WAHAClient:
 
     async def health_check(self) -> bool:
         try:
-            r = await self._http.get("/health")
+            r = await self._http.get("/api/version")
             return r.status_code == 200
         except Exception:
             return False

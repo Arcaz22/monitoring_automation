@@ -6,8 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.settings import get_settings
 from app.infrastructure.waha.client import WAHAClient
+
 from app.interfaces.http.health import router as health_router
 from app.interfaces.http.notify import router as notify_router
+
 from scheduler.jobs import setup_scheduler, scheduler
 
 logging.basicConfig(
@@ -20,20 +22,17 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ── Startup ───────────────────────────────────────────────────────────
     logger.info("=== Project Guardian starting up ===")
 
     waha = WAHAClient()
     app.state.waha = waha
 
-    # Register cron jobs and start scheduler
     setup_scheduler(waha_client=waha, settings=get_settings())
     scheduler.start()
     logger.info("Scheduler started.")
 
     yield
 
-    # ── Shutdown ──────────────────────────────────────────────────────────
     logger.info("=== Project Guardian shutting down ===")
     scheduler.shutdown(wait=False)
     await waha.aclose()
@@ -46,6 +45,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(notify_router, prefix="/api/v1")

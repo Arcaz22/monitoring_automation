@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     waha_dashboard_username:  str
     waha_dashboard_password:  str
 
+    trello_api_key: str
+    trello_token:   str
+    trello_board_id: str
+
     scheduler_hour:   int
     scheduler_minute: int
 
